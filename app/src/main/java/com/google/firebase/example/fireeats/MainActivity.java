@@ -106,7 +106,10 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void initFirestore() {
-        // TODO(developer): Implement
+        // Get the 50 highest rated restaurants
+        mQuery = mFirestore.collection("restaurants")
+                .orderBy("avgRating", Query.Direction.DESCENDING)
+                .limit(LIMIT);
     }
 
     private void initRecyclerView() {
