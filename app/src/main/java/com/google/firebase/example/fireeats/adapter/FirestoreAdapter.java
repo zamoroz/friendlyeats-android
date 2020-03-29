@@ -69,15 +69,12 @@ public abstract class FirestoreAdapter<VH extends RecyclerView.ViewHolder>
             switch (change.getType()) {
                 case ADDED:
                     onDocumentAdded(change);
-                    // TODO: handle document added
                     break;
                 case MODIFIED:
                     onDocumentModified(change);
-                    // TODO: handle document modified
                     break;
                 case REMOVED:
                     onDocumentRemoved(change);
-                    // TODO: handle document removed
                     break;
             }
         }

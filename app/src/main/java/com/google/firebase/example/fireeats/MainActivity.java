@@ -183,8 +183,29 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onFilter(Filters filters) {
-        // TODO(developer): Construct new query
-        showTodoToast();
+        // Построить основной запрос query:
+        Query query = mFirestore.collection("restaurants");
+        // Фильтр «Категория ресторана»
+        if (filters.hasCategory()) {
+            query = query.whereEqualTo("category", filters.getCategory());
+        }
+        // Фильтр «Город»:
+        if (filters.hasCity()) {
+            query = query.whereEqualTo("city", filters.getCity());
+        }
+        // Фильтр «Ценовая категория»
+        if (filters.hasPrice()) {
+            query = query.whereEqualTo("price", filters.getPrice());
+        }
+        // Сортировка (orderBy):
+        if (filters.hasSortBy()) {
+            query = query.orderBy(filters.getSortBy(), filters.getSortDirection());
+        }
+        // Ограничиваем количество:
+        query = query.limit(LIMIT);
+        // Обновляем запрос
+        mQuery = query;
+        mAdapter.setQuery(query);
 
         // Set header
         mCurrentSearchView.setText(Html.fromHtml(filters.getSearchDescription(this)));
