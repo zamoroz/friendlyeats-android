@@ -46,6 +46,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.Transaction;
 
 import me.zhanghai.android.materialratingbar.MaterialRatingBar;
 
@@ -165,8 +166,32 @@ public class RestaurantDetailActivity extends AppCompatActivity implements
     }
 
     private Task<Void> addRating(final DocumentReference restaurantRef, final Rating rating) {
-        // TODO(developer): Implement
-        return Tasks.forException(new Exception("not yet implemented"));
+        // Создать ссылку на новый рейтинг для использования внутри транзакции
+        final DocumentReference ratingRef = restaurantRef.collection("ratings")
+                .document();
+        // В транзакции добавляем новый рейтинг и обновляем суммарные итоги
+        return mFirestore.runTransaction(new Transaction.Function<Void>() {
+            @Override
+            public Void apply(Transaction transaction)
+                    throws FirebaseFirestoreException {
+                Restaurant restaurant = transaction.get(restaurantRef)
+                        .toObject(Restaurant.class);
+                // Вычисляем новое количество оценок
+                int newNumRatings = restaurant.getNumRatings() + 1;
+                // Вычисляем новый средний рейтинг
+                double oldRatingTotal = restaurant.getAvgRating() *
+                        restaurant.getNumRatings();
+                double newAvgRating = (oldRatingTotal + rating.getRating()) /
+                        newNumRatings;
+                // Установить новую информацию о ресторане
+                restaurant.setNumRatings(newNumRatings);
+                restaurant.setAvgRating(newAvgRating);
+                // Передать в Firestore
+                transaction.set(restaurantRef, restaurant);
+                transaction.set(ratingRef, rating);
+                return null;
+            }
+        });
     }
 
     /**
